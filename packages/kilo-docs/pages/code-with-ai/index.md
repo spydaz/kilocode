@@ -38,14 +38,12 @@ Kilo uses specialized agents to help with different tasks:
 - [**Model Selection**](/docs/code-with-ai/agents/model-selection) — Choose the right AI model for each task
 - [**Context Mentions**](/docs/code-with-ai/agents/context-mentions) — Reference files, functions, and symbols
 - [**Orchestrator Mode**](/docs/code-with-ai/agents/orchestrator-mode) — Legacy orchestration (now built into all agents)
-- [**Free & Budget Models**](/docs/code-with-ai/agents/free-and-budget-models) — Cost-effective AI options
 
 ## Features
 
 Core capabilities to boost your productivity:
 
 - [**Autocomplete**](/docs/code-with-ai/features/autocomplete) — Inline code suggestions as you type
-- [**Fast Edits**](/docs/code-with-ai/features/fast-edits) — Quick file modifications
 - [**Code Actions**](/docs/code-with-ai/features/code-actions) — AI-powered refactoring and fixes
 - [**Task & Todo Lists**](/docs/code-with-ai/features/task-todo-list) — Break down complex tasks
 - [**Checkpoints**](/docs/code-with-ai/features/checkpoints) — Save and restore working states

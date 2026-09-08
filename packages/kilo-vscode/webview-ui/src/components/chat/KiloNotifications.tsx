@@ -1,4 +1,4 @@
-import { Component, Show, createEffect, createMemo, createSignal } from "solid-js"
+import { Component, Show, createEffect, createMemo, createSignal, type Accessor } from "solid-js"
 import { useNotifications } from "../../context/notifications"
 import { useVSCode } from "../../context/vscode"
 import { useSession } from "../../context/session"
@@ -8,13 +8,14 @@ import { KILO_PROVIDER_ID } from "../../../../src/shared/provider-model"
 import { TelemetryEventName } from "../../../../src/services/telemetry/types"
 import { stripSubProviderPrefix } from "../shared/model-selector-utils"
 
-export const KiloNotifications: Component = () => {
+export const KiloNotifications: Component<{ sessionID?: Accessor<string | undefined> }> = (props) => {
   const { filteredNotifications, dismiss } = useNotifications()
   const vscode = useVSCode()
   const session = useSession()
   const provider = useProvider()
   const language = useLanguage()
   const [index, setIndex] = createSignal(0)
+  const sessionID = () => props.sessionID?.() ?? session.currentSessionID() ?? session.draftSessionID()
 
   const items = filteredNotifications
   const total = () => items().length
@@ -57,23 +58,27 @@ export const KiloNotifications: Component = () => {
   const canSwitchModel = createMemo(() => {
     const suggestion = suggestedModel()
     if (!suggestion) return false
-    const sel = session.selected()
+    const sel = session.selected(sessionID())
     if (sel && sel.providerID === suggestion.providerID && sel.modelID === suggestion.modelID) return false
     return true
   })
+
+  const MAX_NAME = 30
 
   const suggestedName = createMemo(() => {
     const suggestion = suggestedModel()
     if (!suggestion) return undefined
     const model = provider.findModel(suggestion)
     if (!model?.name) return undefined
-    return stripSubProviderPrefix(model.name)
+    const name = stripSubProviderPrefix(model.name)
+    if (name.length > MAX_NAME) return undefined
+    return name
   })
 
   const handleTryModel = () => {
     const suggestion = suggestedModel()
     if (!suggestion) return
-    session.selectModel(suggestion.providerID, suggestion.modelID)
+    session.selectModel(suggestion.providerID, suggestion.modelID, sessionID())
     vscode.postMessage({
       type: "telemetry",
       event: TelemetryEventName.NOTIFICATION_CLICKED,
@@ -98,7 +103,9 @@ export const KiloNotifications: Component = () => {
             <div class="kilo-notifications-cta-group">
               <Show when={canSwitchModel()}>
                 <button class="kilo-notifications-action-btn" onClick={handleTryModel}>
-                  {language.t("notifications.action.tryModel", { model: suggestedName() ?? "" })}
+                  {suggestedName()
+                    ? language.t("notifications.action.tryModel", { model: suggestedName()! })
+                    : language.t("notifications.action.tryModelGeneric")}
                 </button>
               </Show>
               <Show when={current()?.action}>
